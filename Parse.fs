@@ -26,11 +26,12 @@ let parse parser src =
         Error(ParseError(pos, lastToken, e))
 
 let rec prettyPrint ast =
-   // TODO: start here
-   failwith "GCL parser not yet implemented"
+   match ast with
+   | Skip -> "skip"
+   | Sequence(c1,c2) -> prettyPrint(c1) + "\n" + prettyPrint(c2)
 
 let analysis (src: string) : string =
-    match parse Parser.start (src) with
+    match parse Parser.startGCL (src) with
         | Ok ast ->
             Console.Error.WriteLine("> {0}", ast)
             prettyPrint ast

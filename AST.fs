@@ -6,6 +6,7 @@ module AST
 type expr =
     | Num of float
     | Variable of string
+    | ArrayVal of (string * expr)
     | TimesExpr of (expr * expr)
     | DivExpr of (expr * expr)
     | PlusExpr of (expr * expr)
@@ -13,6 +14,7 @@ type expr =
     | PowExpr of (expr * expr)
     | UPlusExpr of (expr)
     | UMinusExpr of (expr)
+    | Par of (expr)
 
 //b  ::=  true  |  false  |  b & b  |  b | b  |  b && b  |  b|| b  |  ! b
 //     |  a = a  |  a != a  |  a > a  |  a >= a  |  a < a  |  a <= a  |  (b)
@@ -30,6 +32,7 @@ type BoolExpr =
     | BoolGreaterOrEqual of (expr * expr)
     | BoolLess of (expr * expr)
     | BoolLessOrEqual of (expr * expr)
+    | Par of (BoolExpr)
 
 //C  ::=  x := a  |  A[a] := a  |  skip  |  C ; C  |  if GC fi  |  do GC od
 type Command =
@@ -45,7 +48,12 @@ and GuardedCommand =
     | Condition of (BoolExpr * Command)
     | Else of (GuardedCommand * GuardedCommand)
 
-
+type AST = 
+    | S of string
+    | A of expr
+    | B of BoolExpr
+    | C of Command
+    | GC of GuardedCommand
 
 
 

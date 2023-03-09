@@ -10,9 +10,13 @@ System.Globalization.CultureInfo.CurrentCulture <- new System.Globalization.Cult
 
 // We define macros for some regular expressions we will use later
 let digit       = ['0'-'9']
+let chars		= ['a'-'z']
+let charc		= ['A'-'Z']
+let char		= chars | charc
 let num         = digit+ ( '.' digit+)?  ('E' ('+'|'-')? digit+ )?
 let whitespace  = [' ' '\t']
 let newline     = "\n\r" | '\n' | '\r'
+let string		= char+
 
 // We define now the rules for recognising and building tokens
 // for each of the tokens of our language we need a rule
@@ -33,19 +37,31 @@ rule tokenize = parse
 | ')'           { RPAR }
 | "skip"        { SKIP }
 | ';'           { SEMICOLON }
+| "true"        { TRUE }
+| "false"       { FALSE }
+| '&'           { AND }
+| "&&"          { ANDAND }
+| '|'           { OR }
+| "||"          { OROR }
+| '!'           { NEGATE }
+| '='           { EQUAL }
+| "!="          { NOTEQUAL }
+| '>'           { GT }
+| ">="          { GTEQUAL }
+| '<'           { LT }
+| "<="          { LTEQUAL }
+| "if"          { IF }
+| "fi"          { FI }
+| "do"          { DO }
+| "od"          { OD}
+| ":="          { ASSIGN }
+| "->"          { ARROW }
+| '['           { LSQ }
+| ']'           { RSQ }
+| string        { STRING(LexBuffer<_>.LexemeString lexbuf) }
 | eof           { EOF }
 
 
-//| '['           { LBRA }
-//| ']'           { RBRA }
-// | "true"        { TRUE }
-// | "false"       { FALSE }
-//| "&&"          { TRUE }
-//| ';'           { SEMICOLON }
-//| '!'           { NOT }
-//| '='           { EQ }
-//| "||"          { OR }
-//| ":="          { ASSIGN }
-//| "->"          { LEFTARROW }
-//| "if"          { IF }
-//| "fi"          { FI }
+
+
+

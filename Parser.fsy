@@ -61,12 +61,12 @@ boolexpr:
     | boolexpr AND boolexpr             {BoolAnd($1,$3)}
 
 command:
-    | STRING ASSIGN expression                {DeclareVar($1,$3)}
+    | STRING ASSIGN expression                      {DeclareVar($1,$3)}
     | STRING LSQ expression RSQ ASSIGN expression   {DeclareArr($1,$3,$6)}
-    | SKIP                              {Skip}
-    | command SEMICOLON command         {Sequence($1,$3)} 
-    | IF guardedcommand FI              {If($2)}
-    | DO guardedcommand OD              {Do($2)}  
+    | SKIP                                          {Skip}
+    | command SEMICOLON command                     {Sequence($1,$3)} 
+    | IF guardedcommand FI                          {If($2)}
+    | DO guardedcommand OD                          {Do($2)}  
 
 guardedcommand:
     | boolexpr ARROW command            {Condition($1, $3)}   

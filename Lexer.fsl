@@ -31,7 +31,6 @@ rule tokenize = parse
 | '^'           { POW }
 | '('           { LPAR }
 | ')'           { RPAR }
-| "skip"        { SKIP }
 | eof           { EOF }
 
 

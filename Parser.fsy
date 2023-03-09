@@ -23,9 +23,6 @@ open AST
 // We specify the return type of each of then non-terminal symbols
 %type <AST.expr> start
 %type <AST.expr> expression
-%type <AST.Command> startGCL
-%type <AST.Command> command
-
 
 // Grammar productions
 %%
@@ -40,6 +37,12 @@ command:
 //b  ::=  true  |  false  |  b & b  |  b | b  |  b && b  |  b || b  |  ! b
 //     |  a = a  |  a != a  |  a > a  |  a >= a  |  a < a  |  a <= a  |  (b)
 
+
+startGCL: command EOF             { $1 }
+
+command:
+    | SKIP                      {Skip}
+    | command SEMICOLON command {Sequence($1,$3)}     
 
 // The first production in "formal" notation is
 // start -> expression

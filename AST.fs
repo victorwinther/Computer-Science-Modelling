@@ -16,7 +16,7 @@ type Command =
 
 
 //a  ::=  n  |  x  |  A[a]  |  a + a  |  a - a  |  a * a  |  a / a  |  - a  |  a ^ a  |  (a)
-//  type ArithmemeticExpression
+//  type ArithmemeticExpression jakob her
 
 
 //b  ::=  true  |  false  |  b & b  |  b | b  |  b && b  |  b || b  |  ! b

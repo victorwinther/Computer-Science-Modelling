@@ -24,11 +24,20 @@ open AST
 // We specify the return type of each of then non-terminal symbols
 %type <AST.expr> start
 %type <AST.expr> expression
-%type <AST.Command> startGCL
-%type <AST.Command> command
 
 // Grammar productions
 %%
+startGCL: command EOF             { $1 }
+//C  ::=  x := a  |  A[a] := a  |  skip  |  C ; C  |  if GC fi  |  do GC od
+command:
+    | SKIP                      {Skip}
+    | command SEMICOLON command {Sequence($1,$3)}     
+
+//GC ::=  b -> C  |  GC [] GC
+//a  ::=  n  |  x  |  A[a]  |  a + a  |  a - a  |  a * a  |  a / a  |  - a  |  a ^ a  |  (a)
+//b  ::=  true  |  false  |  b & b  |  b | b  |  b && b  |  b || b  |  ! b
+//     |  a = a  |  a != a  |  a > a  |  a >= a  |  a < a  |  a <= a  |  (b)
+
 
 startGCL: command EOF             { $1 }
 

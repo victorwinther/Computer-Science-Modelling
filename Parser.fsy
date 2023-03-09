@@ -26,6 +26,8 @@ open AST
 %type <AST.expr> expression
 %type <AST.Command> startGCL
 %type <AST.Command> command
+%type <AST.BoolExpr> boolexpr
+%type <AST.GuardedCommand> guardedcommand
 
 // Grammar productions
 %%

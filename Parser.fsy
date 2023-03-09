@@ -6,7 +6,7 @@ open AST
 // Declare the tokens (terminal symbols)
 %token <float> NUM
 %token <string> STRING
-%token TIMES DIV PLUS MINUS POW LPAR RPAR SKIP SEMICOLON TRUE FALSE AND ASSIGN ARROW LSQ RSQ IF FI DO OD EOF
+%token TIMES DIV PLUS MINUS POW LPAR RPAR SKIP SEMICOLON TRUE FALSE AND ANDAND OROR NEGATE EQUAL NOTEQUAL GT GTEQUAL LT LTEQUAL ASSIGN ARROW LSQ RSQ IF FI DO OD OR EOF
 // NOTE: the actual formats of these tokens are defined in the lexer file
 //       as regular expressions
 
@@ -59,6 +59,17 @@ boolexpr:
     | TRUE                              {True}
     | FALSE                             {False}
     | boolexpr AND boolexpr             {BoolAnd($1,$3)}
+    | boolexpr OR boolexpr              {BoolOr($1,$3)}
+    | boolexpr ANDAND boolexpr          {BoolAndAnd($1,$3)}
+    | boolexpr OROR boolexpr            {BoolOrOr($1,$3)}
+    | NEGATE boolexpr                      {BoolNot($2)}
+    | expression EQUAL expression			{ BoolEqual($1, $3) }
+	| expression NOTEQUAL expression	    { BoolNotEqual($1, $3) }
+	| expression GT expression				{ BoolGreater($1, $3) }
+	| expression GTEQUAL expression		{ BoolGreaterOrEqual($1, $3) }
+	| expression LT expression				{ BoolLess($1, $3)}
+	| expression LTEQUAL expression		{ BoolLessOrEqual($1, $3) }
+    | LPAR boolexpr RPAR			            { $2 }
 
 command:
     | STRING ASSIGN expression                      {DeclareVar($1,$3)}

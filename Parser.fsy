@@ -5,7 +5,8 @@ open AST
 
 // Declare the tokens (terminal symbols)
 %token <float> NUM
-%token TIMES DIV PLUS MINUS POW LPAR RPAR SKIP SEMICOLON EOF
+%token <string> STRING
+%token TIMES DIV PLUS MINUS POW LPAR RPAR SKIP SEMICOLON TRUE FALSE AND ASSIGN ARROW LSQ RSQ IF FI DO OD EOF
 // NOTE: the actual formats of these tokens are defined in the lexer file
 //       as regular expressions
 
@@ -57,18 +58,18 @@ expression:
 boolexpr:
     | TRUE                              {True}
     | FALSE                             {False}
-    | boolexpr BoolAnd boolexpr
+    | boolexpr AND boolexpr             {BoolAnd($1,$3)}
 
 command:
-    | STRING ASSIGN expr                {DeclareVar($1,$3)
-    | STRING LSQ expr RSQ ASSIGN expr   {DeclareArr($1,$3,$6)
+    | STRING ASSIGN expression                {DeclareVar($1,$3)}
+    | STRING LSQ expression RSQ ASSIGN expression   {DeclareArr($1,$3,$6)}
     | SKIP                              {Skip}
     | command SEMICOLON command         {Sequence($1,$3)} 
     | IF guardedcommand FI              {If($2)}
     | DO guardedcommand OD              {Do($2)}  
 
 guardedcommand:
-    |   
+    | boolexpr ARROW command            {Condition($1, $3)}   
 
 // Again, the code annotation specifies the result of parsing
 // For example { TimesExpr($1,$3) } specifies that parsing with the production

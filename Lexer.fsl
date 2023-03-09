@@ -31,6 +31,19 @@ rule tokenize = parse
 | '^'           { POW }
 | '('           { LPAR }
 | ')'           { RPAR }
-| "skip"        { SKIP }
-| ';'           { SEMICOLON }
 | eof           { EOF }
+
+
+//| '['           { LBRA }
+//| ']'           { RBRA }
+// | "true"        { TRUE }
+// | "false"       { FALSE }
+//| "&&"          { TRUE }
+//| ';'           { SEMICOLON }
+//| '!'           { NOT }
+//| '='           { EQ }
+//| "||"          { OR }
+//| ":="          { ASSIGN }
+//| "->"          { LEFTARROW }
+//| "if"          { IF }
+//| "fi"          { FI }

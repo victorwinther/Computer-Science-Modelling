@@ -17,7 +17,8 @@ type Input = { determinism: Determinism }
 
 type Output = { dot: string }
 
-type Node = string
+type Node = I of int | F of string
+
 type Label = Command
 
 type Edge = {
@@ -25,20 +26,35 @@ type Edge = {
     label : Label;
     target : Node;
 }
-let edges (ast: Command, qS: Node, qF: Node) : List<Edge> =
+
+let mutable f = 0
+
+let rec edges (ast: Command, qS: Node, qF: Node) : List<Edge> =
     match ast with 
+    | DeclareVar(_) -> [{source = qS; label = ast ; target = qF}]
+    | DeclareArr(_) -> [{source = qS; label = ast ; target = qF}]
     | Skip ->  [{source = qS; label = ast ; target = qF}]
-    | Sequence(c1, c2) ->  List.empty
+    | Sequence(c1, c2) -> (f<-f+1); edges(c1, qS, I(f)) @ edges(c2, I(f), qF)
+    //| Sequence(_) ->  [{source = qS; label = ast ; target = qF}]
     | _ -> List.empty
 
+//edges(c1, qS,qF) + ";" + edges(c2, qS, qF)
+
 let ast2pg (ast: Command) : List<Edge> =
-    edges(ast, "q0" , "qF")
+    edges(ast, F("q0") , F("qF"))
 
 let label2dot(l:Label) : string =
     "[label = " + prettyPrint(C(l)) 0 + "]"
+    
+let node2string (n: Node) : string =
+    match n with
+    | I(i) -> string i
+    | F(s) -> s
+
 
 let edge2dot (e: Edge) : string =
-    e.source + " -> " + e.target + " " + label2dot(e.label) + " ;"
+    node2string(e.source) + " -> " + node2string(e.target) + " " + label2dot(e.label) + " ;"
+
 
 let rec edges2dot (pg : List<Edge> ) : string = 
     match pg with

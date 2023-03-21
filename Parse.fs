@@ -32,10 +32,10 @@ let rec prettyPrint (ast:AST) i =
 
     let printCommand command =
         match command with
-        | DeclareVar(s,a) -> ":=" + "\n" + (prettyPrint (S(s)) (i+1)) + "\n" + (prettyPrint (A(a)) (i+1))
+        | DeclareVar(s,a) -> (prettyPrint (S(s)) (i+1)) + " :=" + (prettyPrint (A(a)) (i+1))
         | DeclareArr(s,a,b) ->  "[]:=" + "\n" +  (prettyPrint (S(s)) (i+1)) + "\n" + (prettyPrint (A(a)) (i+1)) + "\n" + (prettyPrint (A(b)) (i+1))
         | Skip ->  "Skip"
-        | Sequence(c1,c2) ->  ";" + "\n" + (prettyPrint (C(c1)) (i+1)) + "\n" + (prettyPrint (C(c2)) (i+1))
+        | Sequence(c1,c2) -> (prettyPrint (C(c1)) (i+1)) + ";" + (prettyPrint (C(c2)) (i+1)) 
         | If(guardedcmd) -> "if x fi" + "\n" + (prettyPrint (GC(guardedcmd)) (i+1))
         | Do(guardedcmd) -> "do x od" + "\n" + (prettyPrint (GC(guardedcmd)) (i+1))
 

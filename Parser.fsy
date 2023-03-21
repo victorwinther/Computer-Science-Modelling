@@ -55,6 +55,7 @@ expression:
     | PLUS expression               { UPlusExpr($2) }
     | MINUS expression              { UMinusExpr($2) }
     | NUM                           { Num($1) }
+    | STRING                        { Variable($1) }
     | LPAR expression RPAR          { $2 }
     | STRING						  { Variable($1) }
     | STRING LPAR expression RPAR	  { ArrayVal($1, $3) } 

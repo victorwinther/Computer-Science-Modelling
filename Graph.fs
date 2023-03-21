@@ -19,61 +19,65 @@ type Output = { dot: string }
 
 type Node = I of int | F of string
 
-type Label = Command
+type Label = AST
 
 type Edge = {
     source : Node;
-    label : Label;
+    label : AST;
     target : Node;
 }
 
-let mutable f = 0
+let mutable i = 0
 
-let rec GC2Edge (gcmd : GuardedCommand) : BoolExpr =
-    match gcmd with
-    |  Else(GC1,GC2) -> BoolAnd(GC2Edge GC1, GC2Edge GC2)
-    |  Condition (d,_) -> BoolNot(d)
+let rec edges (ast: AST, qS: Node, qF: Node) : List<Edge> =
     
-
-let rec edges (ast: Command, qS: Node, qF: Node) : List<Edge> =
-
+    let rec commandEdge cmd =
+        match cmd with
+        | Sequence(c1, c2) -> (i<-i+1); edges(C(c1), qS, I(i)) @ edges(C(c2), I(i), qF)
+        | If(gcmd) -> edges(GC(gcmd), qS, qF)
+        | Do(gcmd) -> edges(GC(gcmd), qS, qF)@[{source = qS;label = GC(gcmd);target =qF}]
+        | _ -> [{source = qS; label = ast ; target = qF}]
+    
+    let rec GuardedCommandEdge Gcmd =
+        match Gcmd with
+        | Else(gc1, gc2) -> edges (GC(gc1), qS, qF) @ edges (GC(gc2), qS, qF)
+        | Condition(b, cmd) -> i<-i+1; {source = qS; label = B(b); target = I(i)}::edges(C(cmd), qF, I(i))
+    
     match ast with 
-    | Sequence(c1, c2) -> (f<-f+1); edges(c1, qS, I(f)) @ edges(c2, I(f), qF)
-    | _ -> [{source = qS; label = ast ; target = qF}]
+    | C(command) -> commandEdge(command)
+    | GC(Gcommand) -> GuardedCommandEdge(Gcommand)
+    | _ -> List.empty
 
-//edges(c1, qS,qF) + ";" + edges(c2, qS, qF)
-
-let ast2pg (ast: Command) : List<Edge> =
+let astToProgramGraph (ast: AST) : List<Edge> =
     edges(ast, F("q0") , F("qF"))
 
-let label2dot(l:Label) : string =
-    "[label=" + prettyPrint(C(l)) 0 + "]"
+let labelToString(label :Label) : string =
+    sprintf "[label=%A]" (prettyPrint label 0)
+    //"[label = " + prettyPrint(C(l)) 0 + "]"
     
-let node2string (n: Node) : string =
+let nodeToString (n: Node) : string =
     match n with
     | I(i) -> string i
     | F(s) -> s
 
+let edgeToString (e: Edge) : string =
+    nodeToString(e.source) + " -> " + nodeToString(e.target) + " " + labelToString(e.label) + " ;"
 
-let edge2dot (e: Edge) : string =
-    node2string(e.source) + " -> " + node2string(e.target) + " " + label2dot(e.label) + ";"
 
-
-let rec edges2dot (pg : List<Edge> ) : string = 
+let rec edgesToString (pg : List<Edge> ) : string = 
     match pg with
     | [] -> ""
-    | e::pg -> edge2dot(e) + edges2dot(pg)
+    | e::pg -> sprintf "%s " (edgeToString e) + edgesToString pg
+    //| e::pg -> edgeToString(e) + edgesToString(pg)
 
-let pg2dot (pg : List<Edge> ) : string = 
-    "digraph program_graph {rankdir=LR; " +
-    edges2dot(pg) + " }"
+let programToString (pg : List<Edge> ) : string = 
+    "digraph program_graph {rankdir=LR; " + (edgesToString pg) + " }"
 
 let analysis (src: string) (input: Input) : Output =
     match parse Parser.startGCL src with
         | Ok ast ->
-            let pg = ast2pg(ast)
-            // Console.Error.WriteLine("> {0}",pg)
-            let dotstring = pg2dot(pg)
+            let pg = astToProgramGraph(C(ast))
+            let dotstring = programToString(pg)
             { dot = dotstring }
 
         | Error e -> {dot = ""}

@@ -95,4 +95,4 @@ let analysis (src: string) : string =
         | Ok ast ->
             Console.Error.WriteLine("> {0}", ast)
             prettyPrint (C(ast)) 0
-        | Error e -> "Parse error: {0}"
+        | Error e -> "Parse error: {0}" 

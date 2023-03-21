@@ -33,49 +33,49 @@ let rec prettyPrint (ast:AST) i =
     let printCommand command =
         match command with
         | DeclareVar(s,a) -> (prettyPrint (S(s)) (i+1)) + " :=" + (prettyPrint (A(a)) (i+1))
-        | DeclareArr(s,a,b) ->  "[]:=" + "\n" +  (prettyPrint (S(s)) (i+1)) + "\n" + (prettyPrint (A(a)) (i+1)) + "\n" + (prettyPrint (A(b)) (i+1))
-        | Skip ->  "Skip"
+        | DeclareArr(s,a,b) -> (prettyPrint (S(s)) (i+1)) + "[" + (prettyPrint (A(a)) (i+1)) + "] :=" + (prettyPrint (A(b)) (i+1))
+        | Skip -> "Skip"
         | Sequence(c1,c2) -> (prettyPrint (C(c1)) (i+1)) + ";" + (prettyPrint (C(c2)) (i+1)) 
-        | If(guardedcmd) -> "if x fi" + "\n" + (prettyPrint (GC(guardedcmd)) (i+1))
-        | Do(guardedcmd) -> "do x od" + "\n" + (prettyPrint (GC(guardedcmd)) (i+1))
+        | If(guardedcmd) -> "if " + (prettyPrint (GC(guardedcmd)) (i+1)) + " fi"
+        | Do(guardedcmd) -> "do " + (prettyPrint (GC(guardedcmd)) (i+1)) + " od"
 
 
     let printExpr expr =
         match expr with
         | Num(f) ->  string(f)
         | Variable(s) ->  s
-        | TimesExpr(a,b) -> "*" + "\n" + (prettyPrint (A(a)) (i+1)) + "\n" + (prettyPrint (A(b)) (i+1))
-        | DivExpr(a,b) -> "/" + "\n" + (prettyPrint (A(a)) (i+1)) + "\n" + (prettyPrint (A(b)) (i+1))
-        | PlusExpr(a,b) -> "+" + "\n" + (prettyPrint (A(a)) (i+1)) + "\n" + (prettyPrint (A(b)) (i+1))
-        | MinusExpr(a,b) -> "- "+ "\n" + (prettyPrint (A(a)) (i+1)) + "\n" + (prettyPrint (A(b)) (i+1))
-        | PowExpr(a,b) -> "^" + "\n" + (prettyPrint (A(a)) (i+1)) + "\n" + (prettyPrint (A(b)) (i+1))
-        | UMinusExpr(a) -> "-" + "\n" + (prettyPrint (A(a)) (i+1))
-        | UPlusExpr(a) -> "+" + "\n" + (prettyPrint (A(a)) (i+1))
-        | ArrayVal(s,a) -> "[]" + "\n" + (prettyPrint (S(s)) (i+1)) + "\n" + (prettyPrint (A(a)) (i+1))
-        | expr.Par(a) -> (prettyPrint (A(a)) i)
+        | TimesExpr(a,b) -> (prettyPrint (A(a)) (i+1)) + "*" + (prettyPrint (A(b)) (i+1))
+        | DivExpr(a,b) -> (prettyPrint (A(a)) (i+1)) + "/" + (prettyPrint (A(b)) (i+1))
+        | PlusExpr(a,b) -> (prettyPrint (A(a)) (i+1)) + "+" + (prettyPrint (A(b)) (i+1))
+        | MinusExpr(a,b) -> (prettyPrint (A(a)) (i+1)) + "-" + (prettyPrint (A(b)) (i+1))
+        | PowExpr(a,b) -> (prettyPrint (A(a)) (i+1)) + "^" + (prettyPrint (A(b)) (i+1))
+        | UMinusExpr(a) -> "-" + (prettyPrint (A(a)) (i+1))
+        | UPlusExpr(a) -> "+" + (prettyPrint (A(a)) (i+1))
+        | ArrayVal(s,a) ->  (prettyPrint (S(s)) (i+1)) + "[]=" + (prettyPrint (A(a)) (i+1))
+        | expr.Par(a) -> "(" + (prettyPrint (A(a)) i) + ")"
 
 
     let printBool bool = 
         match bool with
         | True -> "true"
         | False -> "false"
-        | BoolAnd(a,b) -> "&" + "\n" + (prettyPrint (B(a)) (i+1)) + "\n" + (prettyPrint (B(b)) (i+1))
-        | BoolOr(a,b) -> "|" + "\n" + (prettyPrint (B(a)) (i+1)) + "\n" + (prettyPrint (B(b)) (i+1))
-        | BoolAndAnd(a,b) -> "&&" + "\n" + (prettyPrint (B(a)) (i+1)) + "\n" + (prettyPrint (B(b)) (i+1))
-        | BoolOrOr(a,b) -> "||" + "\n" + (prettyPrint (B(a)) (i+1)) + "\n" + (prettyPrint (B(b)) (i+1))
-        | BoolNot(a) -> "!" + "\n" + (prettyPrint (B(a)) (i+1))
-        | BoolEqual(a,b) -> "=" + "\n" + (prettyPrint (A(a)) (i+1)) + "\n" + (prettyPrint (A(b)) (i+1))
-        | BoolNotEqual(a,b) -> "!=" + "\n" + (prettyPrint (A(a)) (i+1)) + "\n" + (prettyPrint (A(b)) (i+1))
-        | BoolGreater(a,b) -> ">" + "\n" + (prettyPrint (A(a)) (i+1)) + "\n" + (prettyPrint (A(b)) (i+1))
-        | BoolGreaterOrEqual(a,b) -> ">=" + "\n" + (prettyPrint (A(a)) (i+1)) + "\n" + (prettyPrint (A(b)) (i+1))
-        | BoolLess(a,b) -> "<" + "\n" + (prettyPrint (A(a)) (i+1)) + "\n" + (prettyPrint (A(b)) (i+1))
-        | BoolLessOrEqual(a,b) -> "<=" + "\n" + (prettyPrint (A(a)) (i+1)) + "\n" + (prettyPrint (A(b)) (i+1))
-        | Par(a) -> (prettyPrint (B(a)) i)
-
+        | BoolAnd(a,b) -> (prettyPrint (B(a)) (i+1)) + "&" + (prettyPrint (B(b)) (i+1))
+        | BoolOr(a,b) ->  (prettyPrint (B(a)) (i+1)) + "|" + (prettyPrint (B(b)) (i+1))
+        | BoolAndAnd(a,b) -> (prettyPrint (B(a)) (i+1)) + "&&" + (prettyPrint (B(b)) (i+1))
+        | BoolOrOr(a,b) -> (prettyPrint (B(a)) (i+1)) + "||" + (prettyPrint (B(b)) (i+1))
+        | BoolNot(a) -> "!" + (prettyPrint (B(a)) (i+1))
+        | BoolEqual(a,b) -> (prettyPrint (A(a)) (i+1)) + "=" + (prettyPrint (A(b)) (i+1))
+        | BoolNotEqual(a,b) -> (prettyPrint (A(a)) (i+1)) + "!=" + (prettyPrint (A(b)) (i+1))
+        | BoolGreater(a,b) -> (prettyPrint (A(a)) (i+1)) + ">" + (prettyPrint (A(b)) (i+1))
+        | BoolGreaterOrEqual(a,b) -> (prettyPrint (A(a)) (i+1)) + ">=" + (prettyPrint (A(b)) (i+1))
+        | BoolLess(a,b) -> (prettyPrint (A(a)) (i+1)) + "<" + (prettyPrint (A(b)) (i+1))
+        | BoolLessOrEqual(a,b) -> (prettyPrint (A(a)) (i+1)) + "<=" + (prettyPrint (A(b)) (i+1))
+        | Par(a) -> "(" + (prettyPrint (B(a)) i) + ")"
+        
     let printGCommand gcommand = 
         match gcommand with
-        | Condition(b,c) -> "->" + "\n" + (prettyPrint (B(b)) (i+1)) + "\n" + (prettyPrint (C(c)) (i+1))
-        | Else(a,b) -> "[]" + "\n" + (prettyPrint (GC(a)) (i+1)) + "\n" + (prettyPrint (GC(b)) (i+1))
+        | Condition(b,c) -> (prettyPrint (B(b)) (i+1)) + "->" + (prettyPrint (C(c)) (i+1))
+        | Else(a,b) -> (prettyPrint (GC(a)) (i+1)) + "[]" + (prettyPrint (GC(b)) (i+1))
         
     match ast with
         | S(s) -> (spacer i) + s

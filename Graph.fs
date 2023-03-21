@@ -29,14 +29,17 @@ type Edge = {
 
 let mutable f = 0
 
+let rec GC2Edge (gcmd : GuardedCommand) : BoolExpr =
+    match gcmd with
+    |  Else(GC1,GC2) -> BoolAnd(GC2Edge GC1, GC2Edge GC2)
+    |  Condition (d,_) -> BoolNot(d)
+    
+
 let rec edges (ast: Command, qS: Node, qF: Node) : List<Edge> =
+
     match ast with 
-    | DeclareVar(_) -> [{source = qS; label = ast ; target = qF}]
-    | DeclareArr(_) -> [{source = qS; label = ast ; target = qF}]
-    | Skip ->  [{source = qS; label = ast ; target = qF}]
     | Sequence(c1, c2) -> (f<-f+1); edges(c1, qS, I(f)) @ edges(c2, I(f), qF)
-    //| Sequence(_) ->  [{source = qS; label = ast ; target = qF}]
-    | _ -> List.empty
+    | _ -> [{source = qS; label = ast ; target = qF}]
 
 //edges(c1, qS,qF) + ";" + edges(c2, qS, qF)
 
@@ -44,7 +47,7 @@ let ast2pg (ast: Command) : List<Edge> =
     edges(ast, F("q0") , F("qF"))
 
 let label2dot(l:Label) : string =
-    "[label = " + prettyPrint(C(l)) 0 + "]"
+    "[label=" + prettyPrint(C(l)) 0 + "]"
     
 let node2string (n: Node) : string =
     match n with
@@ -53,7 +56,7 @@ let node2string (n: Node) : string =
 
 
 let edge2dot (e: Edge) : string =
-    node2string(e.source) + " -> " + node2string(e.target) + " " + label2dot(e.label) + " ;"
+    node2string(e.source) + " -> " + node2string(e.target) + " " + label2dot(e.label) + ";"
 
 
 let rec edges2dot (pg : List<Edge> ) : string = 

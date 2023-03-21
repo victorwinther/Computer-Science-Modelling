@@ -56,6 +56,8 @@ expression:
     | MINUS expression              { UMinusExpr($2) }
     | NUM                           { Num($1) }
     | LPAR expression RPAR          { $2 }
+    | STRING						  { Variable($1) }
+    | STRING LPAR expression RPAR	  { ArrayVal($1, $3) } 
   
 boolexpr:
     | TRUE                              {True}
@@ -82,6 +84,7 @@ command:
     | DO guardedcommand OD                          {Do($2)}  
 
 guardedcommand:
+    | guardedcommand LSQ RSQ guardedcommand {Else($1,$4)}
     | boolexpr ARROW command            {Condition($1, $3)}   
 
 // Again, the code annotation specifies the result of parsing

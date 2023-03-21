@@ -24,15 +24,18 @@ let parse parser src =
         eprintf "Parse failed at line %d, column %d:\n" line column
         eprintf "Last token: %s" lastToken
         eprintf "\n"
+        eprintf "Message: %s" message
+        eprintf "\n"
         Error(ParseError(pos, lastToken, e))
 
 let spacer i = (String.replicate i " ")
+let newline = "\n"
 
 let rec prettyPrint (ast:AST) i = 
 
     let printCommand command =
         match command with
-        | DeclareVar(s,a) -> (prettyPrint (S(s)) (i+1)) + " :=" + (prettyPrint (A(a)) (i+1))
+        | DeclareVar(s,a) -> " \" " + (prettyPrint (S(s)) (i+1)) + " :=" + (prettyPrint (A(a)) (i+1)) + " \" "
         | DeclareArr(s,a,b) ->  "[]:=" + "\n" +  (prettyPrint (S(s)) (i+1)) + "\n" + (prettyPrint (A(a)) (i+1)) + "\n" + (prettyPrint (A(b)) (i+1))
         | Skip ->  "Skip"
         | Sequence(c1,c2) -> (prettyPrint (C(c1)) (i+1)) + ";" + (prettyPrint (C(c2)) (i+1)) 

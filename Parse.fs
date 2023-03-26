@@ -24,6 +24,8 @@ let parse parser src =
         eprintf "Parse failed at line %d, column %d:\n" line column
         eprintf "Last token: %s" lastToken
         eprintf "\n"
+        eprintf "Message: %s" message
+        eprintf "\n"
         Error(ParseError(pos, lastToken, e))
 
 let rec prettyPrint (ast:AST) i = 

@@ -32,19 +32,99 @@ type Output =
    { execution_sequence: List<Configuration<string>>
      final: TerminationState }
 
-let stringifyNode (internalNode: Node) : string =
-   match internalNode with
-   | I(-1) -> "qF"
-   | _ -> "q" + internalNode.ToString()
+//let stringifyNode (internalNode: Node) : string =
+//   match internalNode with
+//   | I(-1) -> "qF"
+//   | _ -> nodeToString(internalNode)
 
 let prepareConfiguration (c: Configuration<Node>) : Configuration<string> =
-   { node = stringifyNode c.node
+   { node = nodeToString c.node
      memory = c.memory }
 
+let rec ArithmeticSemantic (lab: expr) (m: InterpreterMemory) =
+    match lab with
+    | Num(n) -> Some(n|>int)
+    | Variable(x) -> if m.variables.ContainsKey x  then Some(m.variables.[x]) else None
+    | TimesExpr(a1,a2) ->
+                       let a1m = ArithmeticSemantic a1 m 
+                       let a2m = ArithmeticSemantic a2 m
+                       if a1m.IsSome && a2m.IsSome then Some(a1m.Value*a2m.Value) else None
+    | DivExpr(a1,a2) ->
+                     let a1m = ArithmeticSemantic a1 m 
+                     let a2m = ArithmeticSemantic a2 m
+                     if a1m.IsSome && a2m.IsSome then Some(a1m.Value/a2m.Value) else None
+    | PlusExpr(a1,a2) ->
+                    let a1m = ArithmeticSemantic a1 m 
+                    let a2m = ArithmeticSemantic a2 m
+                    if a1m.IsSome && a2m.IsSome then Some(a1m.Value+a2m.Value) else None
+    | MinusExpr(a1,a2) ->
+                       let a1m = ArithmeticSemantic a1 m 
+                       let a2m = ArithmeticSemantic a2 m
+                       if a1m.IsSome && a2m.IsSome then Some(a1m.Value-a2m.Value) else None
+    | PowExpr(a1,a2) ->
+              let a1m = ArithmeticSemantic a1 m 
+              let a2m = ArithmeticSemantic a2 m
+              if a1m.IsSome && a2m.IsSome && (a2m.Value>=0) then Some(((a1m.Value|>float)**(a2m.Value|>float))|>int) else None
+    | UMinusExpr(a1) ->
+                      let a1m = ArithmeticSemantic a1 m
+                      if a1m.IsSome then Some(-1*a1m.Value) else None
+    
+and BooleanSemantic  (lab: BoolExpr) (m : InterpreterMemory) =
+    match lab with
+    | True -> Some(true)
+    | False -> Some(false)
+    | BoolAnd(b1,b2) ->
+                    let b1m = BooleanSemantic b1 m
+                    let b2m = BooleanSemantic b2 m
+                    if b1m.IsNone then None else (if b1m.Value then Some(b2m.Value) else Some(false)) 
+    | BoolOr(b1,b2) ->
+                    let b1m = BooleanSemantic b1 m
+                    let b2m = BooleanSemantic b2 m
+                    if b1m.IsNone then None else (if b1m.Value then Some(b1m.Value) else Some(b2m.Value)) 
+    | BoolAndAnd(b1,b2) ->
+                       let b1m = BooleanSemantic b1 m
+                       let b2m = BooleanSemantic b2 m
+                       if b1m.IsNone || b2m.IsNone then None else (if b1m.Value && b2m.Value then Some(true) else Some(false))
+    | BoolOrOr(b1,b2) ->
+                      let b1m = (BooleanSemantic b1 m)
+                      let b2m = BooleanSemantic b2 m
+                      if b1m.Value = true || b2m.Value = true then Some(true) else (if b1m.Value = false && b2m.Value = false then Some(false) else None)
+    | BoolNot(b1) ->
+                 let b1m = BooleanSemantic b1 m
+                 if b1m.IsNone then None else if b1m.Value = false then Some(true) else Some(false)
+    | BoolEqual(a1,a2) ->
+                       let a1m = ArithmeticSemantic a1 m
+                       let a2m = ArithmeticSemantic a2 m
+                       if a1m.IsSome && a2m.IsSome then (if (ArithmeticSemantic a1 m).Value = (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None
+    | BoolNotEqual(a1,a2) ->
+                       let a1m = ArithmeticSemantic a1 m
+                       let a2m = ArithmeticSemantic a2 m
+                       if a1m.IsSome && a2m.IsSome then (if (ArithmeticSemantic a1 m).Value <> (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None
+    | BoolGreater(a1,a2) ->
+                         let a1m = ArithmeticSemantic a1 m
+                         let a2m = ArithmeticSemantic a2 m
+                         if a1m.IsSome && a2m.IsSome then (if (ArithmeticSemantic a1 m).Value > (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None  
+    | BoolGreaterOrEqual(a1,a2) ->
+                                 let a1m = ArithmeticSemantic a1 m
+                                 let a2m = ArithmeticSemantic a2 m
+                                 if a1m.IsSome && a2m.IsSome then (if (ArithmeticSemantic a1 m).Value >= (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None 
+    | BoolLess(a1,a2) ->
+                     let a1m = ArithmeticSemantic a1 m
+                     let a2m = ArithmeticSemantic a2 m
+                     if a1m.IsSome && a2m.IsSome then (if (ArithmeticSemantic a1 m).Value < (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None 
+    | BoolLessOrEqual(a1,a2) ->
+                             let a1m = ArithmeticSemantic a1 m
+                             let a2m = ArithmeticSemantic a2 m
+                             if a1m.IsSome && a2m.IsSome then (if (ArithmeticSemantic a1 m).Value <= (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None 
+                    
 let Semantic(lab: Label, m: InterpreterMemory) : Option<'InterpreterMemory> =
     match lab with
     | C(ast) -> match ast with
-                Skip -> Some(m)
+                | Skip -> Some(m)
+                | DeclareVar(x, a) ->
+                                   let (a1: int option) = (ArithmeticSemantic a m)
+                                   if a1.IsSome then Some({variables = m.variables.Add(x,a1.Value); arrays =m.arrays}) else None
+    | B(ast) -> if (BooleanSemantic ast m).Value then Some(m) else None
     | _ -> None
 
 //def 1.11
@@ -67,7 +147,7 @@ let rec ExecutionSequence (pg: ProgramGraph, q: Node, m: InterpreterMemory, tl: 
     let nextStates = ExecutionSteps(pg, q, m)
     match tl, nextStates with
     | 0, _ -> [ {node=q; memory=m} ], 0
-    | _, [] -> ([ {node=q; memory=m} ], if q = I(-1) then 2 else 1)
+    | _, [] -> ([ {node=q; memory=m} ], if q.Equals(F("qF")) then 2 else 1)
     | _, config::confList -> let iniEdge = [ {node=q; memory = m} ]
                              let nextEdge, newCount = ExecutionSequence(pg, config.node, config.memory, tl-1, stateCount)
                              (iniEdge@nextEdge, newCount)

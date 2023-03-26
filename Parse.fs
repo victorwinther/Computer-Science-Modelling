@@ -28,9 +28,6 @@ let parse parser src =
         eprintf "\n"
         Error(ParseError(pos, lastToken, e))
 
-let spacer i = (String.replicate i " ")
-let newline = "\n"
-
 let rec prettyPrint (ast:AST) i = 
 
     let printCommand command =
@@ -81,11 +78,11 @@ let rec prettyPrint (ast:AST) i =
         | Else(a,b) -> (prettyPrint (GC(a)) (i+1)) + "[]" + (prettyPrint (GC(b)) (i+1))
         
     match ast with
-        | S(s) -> (spacer i) + s
-        | A(a) -> (spacer i) + printExpr a
-        | B(b) -> (spacer i) + printBool b
-        | C(c) -> (spacer i) + printCommand c
-        | GC(gc) -> (spacer i) + printGCommand gc
+        | S(s) -> s
+        | A(a) -> printExpr a
+        | B(b) -> printBool b
+        | C(c) -> printCommand c
+        | GC(gc) -> printGCommand gc
     
 //let rec prettyPrint ast =
 //   match ast with

@@ -82,12 +82,6 @@ let rec prettyPrint (ast:AST) i =
         | C(c) -> printCommand c
         | GC(gc) -> printGCommand gc
     
-//let rec prettyPrint ast =
-//   match ast with
-//   | DeclareVar(s, a) -> s + ":=" + a
-//   | Skip -> "skip"
-//   | Sequence(c1,c2) -> prettyPrint(c1) + "\n" + prettyPrint(c2)
-
 let analysis (src: string) : string =
     match parse Parser.startGCL src with
         | Ok ast ->

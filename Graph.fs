@@ -6,13 +6,6 @@ open FSharp.Text.Lexing
 open System
 open AST
 
-
-(*
-    This defines the input and output for graphs. Please do not
-    change the definitions below as they are needed for the validation and
-    evaluation tools!
-*)
-
 type Input = { determinism: Determinism }
 
 type Output = { dot: string }
@@ -26,10 +19,11 @@ type Edge = {
     label : AST;
     target : Node;
 }
+type ProgramGraph = Edge list
 
 let mutable i = 0
 
-let rec edges (ast: AST, qS: Node, qF: Node) : List<Edge> =
+let rec edges (ast: AST, qS: Node, qF: Node) : ProgramGraph =
     
     let rec commandEdge cmd =
         match cmd with
@@ -48,7 +42,7 @@ let rec edges (ast: AST, qS: Node, qF: Node) : List<Edge> =
     | GC(Gcommand) -> GuardedCommandEdge(Gcommand)
     | _ -> List.empty
 
-let astToProgramGraph (ast: AST) : List<Edge> =
+let astToProgramGraph (ast: AST) : ProgramGraph =
     edges(ast, F("q0") , F("qF"))
 
 let labelToString(label :Label) : string =
@@ -81,6 +75,3 @@ let analysis (src: string) (input: Input) : Output =
             { dot = dotstring }
 
         | Error e -> {dot = ""}
-
-
-// dotnet run graph "skip" "{\"determinism\":{\"Case\":\"Deterministic\"}}" 

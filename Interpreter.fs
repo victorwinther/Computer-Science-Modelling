@@ -41,10 +41,30 @@ let prepareConfiguration (c: Configuration<Node>) : Configuration<string> =
    { node = nodeToString c.node
      memory = c.memory }
 
+let rec insertInList x l i=
+    match l,i with
+    | l::list, 0 -> x::list
+    | l::list,_ -> l::insertInList x list (i-1)
+    | [],_ -> []
+let rec listCreator (list:List<int>) (length:int) : List<int>=
+    match list,length with
+    | _,0 -> []
+    | l,length -> (listCreator (0::l) (length-1))
+let arrayGetter x index value (m:InterpreterMemory)=
+    match m.arrays.ContainsKey(x) with
+    | true -> let check = m.arrays.[x]
+              if check.Length > index then m.arrays.Add(x,insertInList value check index) else  m.arrays.Add(x,insertInList value (check@listCreator [] (index-check.Length+1))index)
+    | false -> m.arrays.Add(x,insertInList value (listCreator [] (index+1)) index)
+
+     
+
 let rec ArithmeticSemantic (lab: expr) (m: InterpreterMemory) =
     match lab with
     | Num(n) -> Some(n|>int)
     | Variable(x) -> if m.variables.ContainsKey x  then Some(m.variables.[x]) else None
+    | ArrayVal(s,x) -> 
+                                    if m.arrays.ContainsKey s  then (if m.arrays.[s].Length>(ArithmeticSemantic x m).Value then Some(m.arrays.[s].[(ArithmeticSemantic x m).Value]) else None) 
+                                    else None
     | TimesExpr(a1,a2) ->
                        let a1m = ArithmeticSemantic a1 m 
                        let a2m = ArithmeticSemantic a2 m
@@ -117,13 +137,24 @@ and BooleanSemantic  (lab: BoolExpr) (m : InterpreterMemory) =
                              let a2m = ArithmeticSemantic a2 m
                              if a1m.IsSome && a2m.IsSome then (if (ArithmeticSemantic a1 m).Value <= (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None 
                     
-let Semantic(lab: Label, m: InterpreterMemory) : Option<'InterpreterMemory> =
+and Semantic(lab: Label, m: InterpreterMemory) : Option<'InterpreterMemory> =
     match lab with
     | C(ast) -> match ast with
                 | Skip -> Some(m)
                 | DeclareVar(x, a) ->
                                    let (a1: int option) = (ArithmeticSemantic a m)
                                    if a1.IsSome then Some({variables = m.variables.Add(x,a1.Value); arrays =m.arrays}) else None
+                | DeclareArr(x,a) -> 
+                                    let index = match x with
+                                                                    | ArrayVal(n,e) -> e
+                                                                    | _ -> a
+                                    let ArrayName = match x with 
+                                                                    | ArrayVal(n,e) -> n
+                                                                    | _ -> "Faliure"
+                                    let v = ArithmeticSemantic a m
+                                    let A = ArithmeticSemantic x m
+                                    if (v.IsSome && (ArithmeticSemantic index m).IsSome) then Some({variables = m.variables; arrays = arrayGetter ArrayName (ArithmeticSemantic index m).Value v.Value m}) else None                  
+
     | B(ast) -> if (BooleanSemantic ast m).Value then Some(m) else None
     | _ -> None
 

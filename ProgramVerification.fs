@@ -27,8 +27,13 @@ let analysis (src: string) (input: Input) : Output =
     Console.Error.WriteLine("C = {0}", C)
     Console.Error.WriteLine("Q = {0}", Q)
 
+    let rec spC(C: Command, P: Predicate): Predicate =
+        match C with
+        | Skip -> P
+ //       | _ -> failwith message = "not implemented"
+
     let verification_conditions: List<Predicate> =
-        failwith "Program verification not yet implemented" // TODO: start here
+        [BooleanOp(spC(C,P), Implies, Q)] @ []
 
     // Let this line stay as it is.
     { verification_conditions = List.map serialize_predicate verification_conditions }

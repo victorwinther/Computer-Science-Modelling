@@ -60,82 +60,82 @@ let arrayGetter x index value (m:InterpreterMemory)=
 
 let rec ArithmeticSemantic (lab: expr) (m: InterpreterMemory) =
     match lab with
-    | Num(n) -> Some(n|>int)
+    | Num(n) -> Some(n |> int)
     | Variable(x) -> if m.variables.ContainsKey x  then Some(m.variables.[x]) else None
     | ArrayVal(s,x) -> 
                                     if m.arrays.ContainsKey s  then (if m.arrays.[s].Length>(ArithmeticSemantic x m).Value then Some(m.arrays.[s].[(ArithmeticSemantic x m).Value]) else None) 
                                     else None
     | TimesExpr(a1,a2) ->
-                       let a1m = ArithmeticSemantic a1 m 
-                       let a2m = ArithmeticSemantic a2 m
-                       if a1m.IsSome && a2m.IsSome then Some(a1m.Value*a2m.Value) else None
+                       let a1Sem = ArithmeticSemantic a1 m 
+                       let a2Sem = ArithmeticSemantic a2 m
+                       if a1Sem.IsSome && a2Sem.IsSome then Some(a1Sem.Value*a2Sem.Value) else None
     | DivExpr(a1,a2) ->
-                     let a1m = ArithmeticSemantic a1 m 
-                     let a2m = ArithmeticSemantic a2 m
-                     if a1m.IsSome && a2m.IsSome then Some(a1m.Value/a2m.Value) else None
+                     let a1Sem = ArithmeticSemantic a1 m 
+                     let a2Sem = ArithmeticSemantic a2 m
+                     if a1Sem.IsSome && a2Sem.IsSome then Some(a1Sem.Value/a2Sem.Value) else None
     | PlusExpr(a1,a2) ->
-                    let a1m = ArithmeticSemantic a1 m 
-                    let a2m = ArithmeticSemantic a2 m
-                    if a1m.IsSome && a2m.IsSome then Some(a1m.Value+a2m.Value) else None
+                    let a1Sem = ArithmeticSemantic a1 m 
+                    let a2Sem = ArithmeticSemantic a2 m
+                    if a1Sem.IsSome && a2Sem.IsSome then Some(a1Sem.Value+a2Sem.Value) else None
     | MinusExpr(a1,a2) ->
-                       let a1m = ArithmeticSemantic a1 m 
-                       let a2m = ArithmeticSemantic a2 m
-                       if a1m.IsSome && a2m.IsSome then Some(a1m.Value-a2m.Value) else None
+                       let a1Sem = ArithmeticSemantic a1 m 
+                       let a2Sem = ArithmeticSemantic a2 m
+                       if a1Sem.IsSome && a2Sem.IsSome then Some(a1Sem.Value-a2Sem.Value) else None
     | PowExpr(a1,a2) ->
-              let a1m = ArithmeticSemantic a1 m 
-              let a2m = ArithmeticSemantic a2 m
-              if a1m.IsSome && a2m.IsSome && (a2m.Value>=0) then Some(((a1m.Value|>float)**(a2m.Value|>float))|>int) else None
+              let a1Sem = ArithmeticSemantic a1 m 
+              let a2Sem = ArithmeticSemantic a2 m
+              if a1Sem.IsSome && a2Sem.IsSome && (a2Sem.Value>=0) then Some(((a1Sem.Value|>float)**(a2Sem.Value|>float))|>int) else None
     | UMinusExpr(a1) ->
-                      let a1m = ArithmeticSemantic a1 m
-                      if a1m.IsSome then Some(-1*a1m.Value) else None
+                      let a1Sem = ArithmeticSemantic a1 m
+                      if a1Sem.IsSome then Some(-1*a1Sem.Value) else None
     
 and BooleanSemantic  (lab: BoolExpr) (m : InterpreterMemory) =
     match lab with
     | True -> Some(true)
     | False -> Some(false)
     | BoolAnd(b1,b2) ->
-                    let b1m = BooleanSemantic b1 m
-                    let b2m = BooleanSemantic b2 m
-                    if b1m.IsNone then None else (if b1m.Value then Some(b2m.Value) else Some(false)) 
+                    let b1Sem = BooleanSemantic b1 m
+                    let b2Sem = BooleanSemantic b2 m
+                    if b1Sem.IsNone then None else (if b1Sem.Value then Some(b2Sem.Value) else Some(false)) 
     | BoolOr(b1,b2) ->
-                    let b1m = BooleanSemantic b1 m
-                    let b2m = BooleanSemantic b2 m
-                    if b1m.IsNone then None else (if b1m.Value then Some(b1m.Value) else Some(b2m.Value)) 
+                    let b1Sem = BooleanSemantic b1 m
+                    let b2Sem = BooleanSemantic b2 m
+                    if b1Sem.IsNone then None else (if b1Sem.Value then Some(b1Sem.Value) else Some(b2Sem.Value)) 
     | BoolAndAnd(b1,b2) ->
-                       let b1m = BooleanSemantic b1 m
-                       let b2m = BooleanSemantic b2 m
-                       if b1m.IsNone || b2m.IsNone then None else (if b1m.Value && b2m.Value then Some(true) else Some(false))
+                       let b1Sem = BooleanSemantic b1 m
+                       let b2Sem = BooleanSemantic b2 m
+                       if b1Sem.IsNone || b2Sem.IsNone then None else (if b1Sem.Value && b2Sem.Value then Some(true) else Some(false))
     | BoolOrOr(b1,b2) ->
-                      let b1m = (BooleanSemantic b1 m)
-                      let b2m = BooleanSemantic b2 m
-                      if b1m.Value = true || b2m.Value = true then Some(true) else (if b1m.Value = false && b2m.Value = false then Some(false) else None)
+                      let b1Sem = (BooleanSemantic b1 m)
+                      let b2Sem = BooleanSemantic b2 m
+                      if b1Sem.Value = true || b2Sem.Value = true then Some(true) else (if b1Sem.Value = false && b2Sem.Value = false then Some(false) else None)
     | BoolNot(b1) ->
-                 let b1m = BooleanSemantic b1 m
-                 if b1m.IsNone then None else if b1m.Value = false then Some(true) else Some(false)
+                 let b1Sem = BooleanSemantic b1 m
+                 if b1Sem.IsNone then None else if b1Sem.Value = false then Some(true) else Some(false)
     | BoolEqual(a1,a2) ->
-                       let a1m = ArithmeticSemantic a1 m
-                       let a2m = ArithmeticSemantic a2 m
-                       if a1m.IsSome && a2m.IsSome then (if (ArithmeticSemantic a1 m).Value = (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None
+                       let a1Sem = ArithmeticSemantic a1 m
+                       let a2Sem = ArithmeticSemantic a2 m
+                       if a1Sem.IsSome && a2Sem.IsSome then (if (ArithmeticSemantic a1 m).Value = (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None
     | BoolNotEqual(a1,a2) ->
-                       let a1m = ArithmeticSemantic a1 m
-                       let a2m = ArithmeticSemantic a2 m
-                       if a1m.IsSome && a2m.IsSome then (if (ArithmeticSemantic a1 m).Value <> (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None
+                       let a1Sem = ArithmeticSemantic a1 m
+                       let a2Sem = ArithmeticSemantic a2 m
+                       if a1Sem.IsSome && a2Sem.IsSome then (if (ArithmeticSemantic a1 m).Value <> (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None
     | BoolGreater(a1,a2) ->
-                         let a1m = ArithmeticSemantic a1 m
-                         let a2m = ArithmeticSemantic a2 m
-                         if a1m.IsSome && a2m.IsSome then (if (ArithmeticSemantic a1 m).Value > (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None  
+                         let a1Sem = ArithmeticSemantic a1 m
+                         let a2Sem = ArithmeticSemantic a2 m
+                         if a1Sem.IsSome && a2Sem.IsSome then (if (ArithmeticSemantic a1 m).Value > (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None  
     | BoolGreaterOrEqual(a1,a2) ->
-                                 let a1m = ArithmeticSemantic a1 m
-                                 let a2m = ArithmeticSemantic a2 m
-                                 if a1m.IsSome && a2m.IsSome then (if (ArithmeticSemantic a1 m).Value >= (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None 
+                                 let a1Sem = ArithmeticSemantic a1 m
+                                 let a2Sem = ArithmeticSemantic a2 m
+                                 if a1Sem.IsSome && a2Sem.IsSome then (if (ArithmeticSemantic a1 m).Value >= (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None 
     | BoolLess(a1,a2) ->
-                     let a1m = ArithmeticSemantic a1 m
-                     let a2m = ArithmeticSemantic a2 m
-                     if a1m.IsSome && a2m.IsSome then (if (ArithmeticSemantic a1 m).Value < (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None 
+                     let a1Sem = ArithmeticSemantic a1 m
+                     let a2Sem = ArithmeticSemantic a2 m
+                     if a1Sem.IsSome && a2Sem.IsSome then (if (ArithmeticSemantic a1 m).Value < (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None 
     | BoolLessOrEqual(a1,a2) ->
-                             let a1m = ArithmeticSemantic a1 m
-                             let a2m = ArithmeticSemantic a2 m
-                             if a1m.IsSome && a2m.IsSome then (if (ArithmeticSemantic a1 m).Value <= (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None 
+                             let a1Sem = ArithmeticSemantic a1 m
+                             let a2Sem = ArithmeticSemantic a2 m
+                             if a1Sem.IsSome && a2Sem.IsSome then (if (ArithmeticSemantic a1 m).Value <= (ArithmeticSemantic a2 m).Value then Some(true) else Some(false)) else None 
                     
 and Semantic(lab: Label, m: InterpreterMemory) : Option<'InterpreterMemory> =
     match lab with
@@ -168,7 +168,7 @@ let rec ExecutionSteps(pg: ProgramGraph, q: Node, m: InterpreterMemory) : List<C
             ExecutionSteps(pg2, q, m)
         else
             let memPrime = Semantic(lab, m)
-            if memPrime.IsSome then [{node=t; memory=memPrime.Value}]@ExecutionSteps(pg2, q, m)
+            if memPrime.IsSome then [ {node=t; memory=memPrime.Value} ]@ExecutionSteps(pg2, q, m)
             else
                 ExecutionSteps(pg2, q, m)
     | [] -> []

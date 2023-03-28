@@ -21,6 +21,8 @@ type Edge = {
 }
 type ProgramGraph = Edge list
 
+type ProgramGraph = Edge List
+
 let mutable i = 0
 
 let rec edges (ast: AST, qS: Node, qF: Node) : ProgramGraph =

@@ -27,10 +27,27 @@ let analysis (src: string) (input: Input) : Output =
     Console.Error.WriteLine("C = {0}", C)
     Console.Error.WriteLine("Q = {0}", Q)
 
+
+
+
     let rec spC(C: Command, P: Predicate): Predicate =
         match C with
         | Skip -> P
- //       | _ -> failwith message = "not implemented"
+
+        // test linje til inspectify:
+        // {true} if true -> skip fi {true}
+        | If(Guard(b: BExpr ,cmd: Command)) -> spC((cmd), P)
+
+        // virker nok ikke helt - ved ikke hvordan man laver "or" imellem outputtet
+        // {true} if (3 > -53) ->   skip [] (3 = 3) ->    skip fi {false} - denne command giver dog korrekt i inspectify, selvom den nok er forkert implementeret
+        | If (Choice(Guard(b1, gc1), Guard(b2, gc2))) -> spC(gc1, P) ; spC(gc2, P)
+
+        // assign virker ikke - ved ikke lige hvordan man skal skrive det :))
+        // | Assign(str, aexpr) -> Exists(str, P)
+
+
+        | Sep(C1, C2) -> spC(C2, spC(C1, P))
+        | _ -> failwith "not implemented"
 
     let verification_conditions: List<Predicate> =
         [BooleanOp(spC(C,P), Implies, Q)] @ []

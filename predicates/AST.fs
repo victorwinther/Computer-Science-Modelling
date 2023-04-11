@@ -111,7 +111,7 @@ type Command =
     | ArrayAssign of string * AExpr * AExpr
     | Sep of Command * Command
     | If of GuardedCommand
-    | Do of Predicate * GuardedCommand
+    | Do of Predicate * GuardedCommand  
     override this.ToString() =
         match this with
         | Skip -> "skip"

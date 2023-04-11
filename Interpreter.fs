@@ -32,14 +32,32 @@ type Output =
    { execution_sequence: List<Configuration<string>>
      final: TerminationState }
 
-//let stringifyNode (internalNode: Node) : string =
-//   match internalNode with
-//   | I(-1) -> "qF"
-//   | _ -> nodeToString(internalNode)
-
 let prepareConfiguration (c: Configuration<Node>) : Configuration<string> =
    { node = nodeToString c.node
      memory = c.memory }
+
+let rec insertInList x l i=
+    match l,i with
+    | l::list, 0 -> x::list
+    | l::list,_ -> l::insertInList x list (i-1)
+    | [],_ -> []
+    
+let rec listCreator (list:List<int>) (length:int) : List<int>=
+    match list,length with
+    | _,0 -> []
+    | l,length -> (listCreator (0::l) (length-1))
+    
+let arrayGetter x index value (m:InterpreterMemory)=
+    match m.arrays.ContainsKey(x) with
+    | true -> let check = m.arrays.[x]
+    
+              if check.Length > index then m.arrays.Add(x,insertInList value check index)
+              else  m.arrays.Add(x,insertInList value (check@listCreator [] (index-check.Length+1))index)
+              
+    | false -> m.arrays.Add(x,insertInList value (listCreator [] (index+1)) index)
+
+
+
 
 let rec ArithmeticSemantic (lab: expr) (m: InterpreterMemory) =
     match lab with

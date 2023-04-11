@@ -28,8 +28,6 @@ let analysis (src: string) (input: Input) : Output =
     Console.Error.WriteLine("Q = {0}", Q)
 
 
-
-// GPT bud below 
     let rec spC(C: Command, P: Predicate): Predicate =
         let rec spGC(GC: GuardedCommand, P: Predicate): Predicate =
             match GC with
@@ -38,9 +36,7 @@ let analysis (src: string) (input: Input) : Output =
 
         match C with
         | Skip -> P
-
         | If(GuardedCommand) -> spGC(GuardedCommand, P)
-
         | Sep(C1, C2) -> spC(C2, spC(C1, P))
         | _ -> failwith "not implemented"
 (*

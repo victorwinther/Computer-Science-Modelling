@@ -28,17 +28,55 @@ let analysis (src: string) (input: Input) : Output =
     Console.Error.WriteLine("Q = {0}", Q)
 
 
-    let rec spC(C: Command, P: Predicate): Predicate =
-        let rec spGC(GC: GuardedCommand, P: Predicate): Predicate =
-            match GC with
-            | Guard(b, cmd) -> spC(cmd, BooleanOp(b, And, P))
-            | Choice(GC1, GC2) -> BooleanOp(spGC(GC1, P), Or, spGC(GC2, P))
+    let rec doneGC(GC: GuardedCommand) : Predicate =
+        match GC with
+        | Guard(b,c) -> Not(b)
+        | Choice(gc1, gc2) -> BooleanOp(doneGC(gc1), And, doneGC(gc2))
 
+    let mutable counter = 0
+
+    let assignFunc(x:String,a:AExpr,P:Predicate):Predicate =
+        let cP = BooleanOp(P,LAnd,RelationalOp(Variable(x),Eq,a))
+        let newWar = "_"+x
+
+        Exists(newWar,cP)
+
+    let rec spC(C: Command, P: Predicate): Predicate =
+        let rec spGC(GC: GuardedCommand, P: Predicate) : Predicate =
+            match GC with
+            | Guard(b, c) -> spC(c, BooleanOp(b, LAnd, P))
+            | Choice(gc1, gc2) -> BooleanOp(spGC(gc1, P), Or, spGC(gc2, P))
+            | _ -> failwith "not yet"
+        
         match C with
         | Skip -> P
-        | If(GuardedCommand) -> spGC(GuardedCommand, P)
-        | Sep(C1, C2) -> spC(C2, spC(C1, P))
+        | Assign(x,a) -> assignFunc(x, a, P)
+        | Sep(c1,c2) -> spC(c2, spC(c1, P))
+        | If(gc) -> spGC(gc, P)
+        | Do(I, gc) -> BooleanOp(I, And, doneGC(gc))
         | _ -> failwith "not implemented"
+
+    let rec vcC (C: Command, R: Predicate) =
+        let rec vcGC(GC: GuardedCommand, R: Predicate) =
+            match GC with
+            | Guard(b,c) -> vcC(c,BooleanOp(b,And,R))
+            | Choice(gc1,gc2) -> vcGC(gc1,R) @ vcGC(gc2,R)
+            | _ -> failwith "not yet"
+
+        match C with
+        | Skip -> []
+        | Assign(x,a)-> []
+        | Sep(c1,c2) -> vcC(c1,R) @ vcC(c2,spC(c1,R))
+        | If(gc) -> vcGC(gc,R)
+        //| Do(I,gc) -> [R, Implies, I, (spC((gc),I)), Implies, I] @ vcGC(gc,I)
+        | _ -> failwith "not yet"
+    
+    let verification_conditions : List<Predicate> =
+        [BooleanOp(spC(C,P), Implies, Q)] @ vcC(C,P)
+
+    // Let this line stay as it is.
+    { verification_conditions = List.map serialize_predicate verification_conditions }
+
 (*
     let rec spC(C: Command, P: Predicate): Predicate =
         match C with
@@ -58,11 +96,4 @@ let analysis (src: string) (input: Input) : Output =
         | Sep(C1, C2) -> spC(C2, spC(C1, P))
         | _ -> failwith "not implemented"
 *)
-
-
-    let verification_conditions: List<Predicate> =
-        [BooleanOp(spC(C,P), Implies, Q)] @ []
-
-    // Let this line stay as it is.
-    { verification_conditions = List.map serialize_predicate verification_conditions }
 

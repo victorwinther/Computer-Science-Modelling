@@ -134,3 +134,7 @@ type AnnotatedCommand =
     override this.ToString() =
         match this with
         | AnnotatedCommand (p, c, q) -> $"{{{p}}} {c} {{{q}}}"
+
+//type AST = 
+//    | C of Command
+//    | GC of GuardedCommand

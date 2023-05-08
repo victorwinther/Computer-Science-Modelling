@@ -21,7 +21,6 @@ type Output =
       allowed: Flow list
       violations: Flow list }
 
-
 let rec Sec (cmd: Command, X) : List<Flow> =
     match cmd with
     | DeclareVar(x,a) -> nestedList(Set.union (X) (fvA(a, set [])), set [x])

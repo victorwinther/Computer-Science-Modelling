@@ -29,21 +29,9 @@ type Output =
 
 
 let analysis (src: string) (input: Input) : Output =
-    failwith "Sign analysis not yet implemented" // TODO: start here
+    failwith "Sign analysis not yet implemented" 
     
-    
-    
-    let rec scemanticA (e: expr, mem1: SignAssignment, mem2: SignAssignment) =
-        match e with
-        | Num(e) -> if e > 0 then set [Positive] else if e < 0 then set [Negative] else set [Zero]
-        | Variable(e) -> set [mem1.variables[e]]
-        | PlusExpr(a1, a2) -> 
-    
-    
-    
-    and passTheAux(s1, op, s2) =
-        let calc = match op with
-        | "+" -> Set.map (fun x -> Set.map (fun y -> ))
+ 
     
     
     

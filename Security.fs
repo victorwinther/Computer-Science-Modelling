@@ -35,7 +35,7 @@ and nestedList (s1, s2) = Set.toList(Set.unionMany(Set.map(fun x -> (Set.map (fu
 and allowedFlows (from, into, inp: Input) : bool = 
     if from = into then true
     else if inp.lattice
-            |> List.contains ({from = from; into = into}) then true
+        |> List.contains ({from = from; into = into}) then true
     else if dirFunc(from, into, inp) then true
     else false
     
